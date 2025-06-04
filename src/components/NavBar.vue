@@ -1,31 +1,33 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container-fluid">
-      <router-link class="navbar-brand" to="/">Control de Activos</router-link>
+      <router-link to="/" class="navbar-brand">Mis Activos Digitales</router-link>
+
       <button
         class="navbar-toggler"
         type="button"
         data-bs-toggle="collapse"
-        data-bs-target="#navbarNav"
-        aria-controls="navbarNav"
+        :data-bs-target="'#navbarSupportedContent'"
+        aria-controls="navbarSupportedContent"
         aria-expanded="false"
         aria-label="Toggle navigation"
       >
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav me-auto">
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <router-link class="nav-link" to="/">Inicio</router-link>
+            <router-link to="/" class="nav-link">Inicio</router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" to="/setup">Configurar Organización</router-link>
+            <router-link to="/setup" class="nav-link">Configuración</router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" to="/list">Ver Activos</router-link>
+            <router-link to="/list" class="nav-link">Listado de Activos</router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" to="/add-asset">Agregar Activo</router-link>
+            <router-link to="/add-asset" class="nav-link">Agregar Activo</router-link>
           </li>
         </ul>
       </div>
@@ -40,7 +42,15 @@ export default {
 </script>
 
 <style scoped>
-.navbar {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.navbar-brand {
+  font-weight: bold;
+}
+
+.nav-link {
+  color: white !important;
+}
+
+.nav-link:hover {
+  color: #f8f9fa !important;
 }
 </style>
