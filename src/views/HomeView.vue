@@ -1,6 +1,11 @@
 <template>
   <div class="container mt-5">
-    <h1 class="mb-4">Bienvenido al Mapeador de Activos Digitales</h1>
+    <!-- Notificación de Versión Beta -->
+    <div class="alert alert-info alert-dismissible fade show small" role="alert">
+      <strong>🧪 Versión Beta</strong> – Esta es una versión funcional y usable del mapeador. Se
+      sigue trabajando activamente en nuevas funcionalidades y mejoras.
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
 
     <!-- Introducción -->
     <section class="mb-5">
@@ -55,7 +60,7 @@
         </li>
         <li>
           <strong>Agrega áreas</strong>: Define las áreas de trabajo (ej: Comunicaciones, Seguridad,
-          Legales, etc.)
+          Legales)
         </li>
         <li>
           <strong>Asocia personas a cada área</strong>: Puedes usar nombres reales, apodos o
@@ -66,8 +71,7 @@
           digital) y completa los campos relevantes
         </li>
         <li>
-          <strong>Asigna el activo</strong>: Elige el área y responsable desde los datos que
-          registraste antes
+          <strong>Asigna el activo</strong>: Elige el área y responsable desde los datos registrados
         </li>
         <li>
           <strong>Ver Listado</strong>: Revisa, filtra y exporta todos los activos desde la lista
@@ -81,8 +85,9 @@
     <section class="mb-5">
       <h2>🎓 Créditos & Licencia</h2>
       <p>
-        Esta herramienta fue creada por <strong>Phi Requiem</strong>, inspirada en buenas prácticas
-        de seguridad digital para colectivos y defensores de derechos humanos.
+        Esta herramienta fue creada por <strong>Seguridades.org</strong>, con el objetivo de ayudar
+        a colectivos, defensores de derechos humanos y periodistas a gestionar sus activos digitales
+        de forma segura y autónoma.
       </p>
       <p>
         <strong>Licencia:</strong> Creative Commons Attribution 4.0 International License
@@ -132,11 +137,18 @@ h2 {
   color: #2c3e50;
   margin-bottom: 1rem;
 }
+
 section ul,
 section ol {
   padding-left: 1.25rem;
 }
+
 .btn-lg {
   font-size: 1rem;
+}
+
+.small,
+small {
+  font-size: 0.9rem;
 }
 </style>
