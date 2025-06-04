@@ -95,7 +95,7 @@
       </p>
       <p>
         <strong>Descárgala aquí:</strong>
-        <a href="https://github.com/phirequiem/activos" target="_blank"
+        <a href="https://github.com/seguridades/activos" target="_blank"
           >GitHub - Mapeador de Activos</a
         >
       </p>
@@ -107,7 +107,7 @@
       <ul>
         <li>
           Reporta errores o mejoras en el
-          <a href="https://github.com/phirequiem/activos/issues" target="_blank"
+          <a href="https://github.com/seguridades/activos/issues" target="_blank"
             >repositorio de GitHub</a
           >
         </li>
