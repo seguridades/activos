@@ -12,12 +12,19 @@
         Para organizaciones, defensores de derechos humanos y periodistas que necesitan gestionar
         activos digitales de forma segura y autónoma.
       </p>
+      <p>
+        <small
+          >Esta herramienta te ayuda a registrar hardware, cuentas online y recursos digitales de
+          forma sencilla y sin conexión permanente.</small
+        >
+      </p>
     </section>
 
     <!-- Secciones principales -->
     <section class="mb-5">
       <div class="row g-4 justify-content-center">
         <!-- Introducción -->
+
         <div class="col-md-6 col-lg-4">
           <div class="card shadow-sm border h-100">
             <div class="card-body d-flex flex-column">
@@ -28,9 +35,10 @@
                 Tener un inventario actualizado de los activos digitales es fundamental para
                 proteger información sensible y garantizar acceso en situaciones críticas.
               </p>
-              <p class="card-text">
-                Esta herramienta te ayuda a registrar hardware, cuentas online y recursos digitales
-                de forma sencilla y sin conexión permanente.
+              <p class="card-text text-info-emphasis fw-semibold">
+                <i class="bi bi-door-open me-1"></i>
+                También es clave para actualizar los protocolos de ingreso y egreso de personas en
+                tu equipo. Facilita la transición digital al entrar o salir alguien del proyecto.
               </p>
             </div>
           </div>
@@ -104,9 +112,9 @@
                 <i class="bi bi-person-circle me-2"></i> Créditos & Licencia
               </h3>
               <p class="card-text mt-3">
-                Esta herramienta fue creada por <strong>Seguridades.org</strong>, con el objetivo de
-                ayudar a colectivos, defensores y periodistas a gestionar sus activos digitales de
-                forma segura y autónoma.
+                Esta herramienta fue creada por <strong>seguridades.org</strong> para la comunidad,
+                con el objetivo de ayudar a colectivos, defensores y periodistas a gestionar sus
+                activos digitales de forma segura y autónoma.
               </p>
               <p class="card-text">
                 <strong>Licencia:</strong> Creative Commons Attribution 4.0 International License

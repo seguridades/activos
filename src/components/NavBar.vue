@@ -1,5 +1,9 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4 position-relative">
+  <nav
+    class="navbar navbar-expand-lg shadow-sm mb-4 position-relative"
+    style="background-color: #f50057"
+    data-bs-theme="light"
+  >
     <div class="container-fluid">
       <!-- Logo + Nombre -->
       <router-link to="/" class="navbar-brand d-flex align-items-center">
@@ -65,6 +69,7 @@ export default {
 <style scoped>
 .navbar-brand {
   font-weight: bold;
+  color: white;
 }
 
 .beta-badge-container {

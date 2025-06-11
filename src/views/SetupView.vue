@@ -15,7 +15,7 @@
           <i class="bi bi-save me-1"></i> Guardar Configuración
         </button>
         <router-link to="/list" class="btn btn-lg btn-secondary">
-          <i class="bi bi-arrow-left me-1"></i> Volver al Listado
+          <i class="bi bi-arrow-left me-1"></i> Ir al Listado
         </router-link>
       </div>
     </section>
@@ -122,6 +122,18 @@
       <button @click="addNewArea" class="btn btn-outline-primary mt-3">
         <i class="bi bi-plus-circle me-1"></i> Añadir Nueva Área
       </button>
+
+      <!-- Guardar / Volver - Destacado arriba -->
+      <section class="mb-5 position-relative">
+        <div class="d-flex flex-wrap gap-3 justify-content-center">
+          <button @click="saveOrganization" class="btn btn-lg btn-success fw-bold">
+            <i class="bi bi-save me-1"></i> Guardar Configuración
+          </button>
+          <router-link to="/list" class="btn btn-lg btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Ir al Listado
+          </router-link>
+        </div>
+      </section>
     </section>
 
     <!-- Línea divisoria -->
