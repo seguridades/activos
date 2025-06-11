@@ -1,38 +1,76 @@
 <template>
   <div class="container mt-5">
-    <h2>⚙️ Configuración</h2>
+    <!-- Hero -->
+    <section class="mb-4 text-center">
+      <div class="d-flex justify-content-center mb-3">
+        <i class="bi bi-gear-wide-connected display-3 text-primary"></i>
+      </div>
+      <h3 class="text-muted small">Configura los datos de tu organización y áreas</h3>
+    </section>
+
+    <!-- Guardar / Volver - Destacado arriba -->
+    <section class="mb-5 position-relative">
+      <div class="d-flex flex-wrap gap-3 justify-content-center">
+        <button @click="saveOrganization" class="btn btn-lg btn-success fw-bold">
+          <i class="bi bi-save me-1"></i> Guardar Configuración
+        </button>
+        <router-link to="/list" class="btn btn-lg btn-secondary">
+          <i class="bi bi-arrow-left me-1"></i> Volver al Listado
+        </router-link>
+      </div>
+    </section>
 
     <!-- Datos de la organización -->
-    <section class="mb-4">
-      <h4 class="mb-3">Organización</h4>
-      <div class="mb-3">
-        <label for="orgName" class="form-label">Nombre de la Organización</label>
-        <input v-model="organization.name" id="orgName" type="text" class="form-control" />
-      </div>
-      <div class="mb-3">
-        <label for="orgResponsible" class="form-label"
-          >Responsable del seguimiento de activos</label
-        >
-        <input
-          v-model="organization.responsable"
-          id="orgResponsible"
-          type="text"
-          class="form-control"
-        />
+    <section class="mb-5">
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+          <h4 class="card-title text-primary fw-bold mb-3">🏢 Organización</h4>
+
+          <!-- Nombre -->
+          <div class="mb-3">
+            <label for="orgName" class="form-label">Nombre de la Organización</label>
+            <input v-model="organization.name" id="orgName" type="text" class="form-control" />
+            <small class="text-muted mt-1 d-block">Ej: Red de Seguridad Digital</small>
+          </div>
+
+          <!-- Responsable -->
+          <div class="mb-0">
+            <label for="orgResponsible" class="form-label">Responsable del seguimiento</label>
+            <input
+              v-model="organization.responsable"
+              id="orgResponsible"
+              type="text"
+              class="form-control"
+            />
+            <small class="text-muted mt-1 d-block">
+              Esta persona supervisará el inventario de activos
+            </small>
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- Gestión de áreas -->
     <section class="mb-5">
-      <h4 class="mb-3">Áreas</h4>
+      <h4 class="mb-3 d-flex align-items-center">
+        <i class="bi bi-diagram-3 me-2"></i> Áreas de Trabajo
+        <span class="badge bg-secondary ms-2">{{ organization.areas.length }}</span>
+      </h4>
 
       <div
         v-for="(area, index) in organization.areas"
         :key="index"
         class="card shadow-sm border mb-3"
       >
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <strong>{{ area.name || 'Área sin nombre' }}</strong>
+          <button @click="removeArea(index)" class="btn btn-sm btn-outline-danger">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
         <div class="card-body">
           <div class="row g-3">
+            <!-- Nombre del área -->
             <div class="col-md-5">
               <input
                 v-model="area.name"
@@ -41,6 +79,8 @@
                 placeholder="Nombre del área"
               />
             </div>
+
+            <!-- Responsable del área -->
             <div class="col-md-5">
               <input
                 v-model="area.responsable"
@@ -49,67 +89,93 @@
                 placeholder="Responsable del área"
               />
             </div>
-            <div class="col-md-2 d-flex align-items-center">
-              <button @click="removeArea(index)" class="btn btn-danger btn-sm w-100">
-                Eliminar
-              </button>
-            </div>
           </div>
 
-          <!-- Gestión de personal -->
-          <div class="mt-3">
-            <button @click="addPersonToArea(index)" class="btn btn-sm btn-outline-secondary mb-2">
-              + Añadir Persona
+          <!-- Personal -->
+          <div class="mt-4">
+            <h6 class="fw-semibold">🧑‍💼 Personal asignado</h6>
+
+            <div v-if="area.personal && area.personal.length > 0" class="list-personal mt-2">
+              <div
+                v-for="(persona, pIndex) in area.personal"
+                :key="pIndex"
+                class="input-group input-group-sm mb-2"
+              >
+                <input
+                  v-model="area.personal[pIndex].nombre"
+                  type="text"
+                  class="form-control form-control-sm"
+                />
+                <button @click="removePersonFromArea(index, pIndex)" class="btn btn-outline-danger">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+
+            <button @click="addPersonToArea(index)" class="btn btn-sm btn-outline-secondary mt-2">
+              <i class="bi bi-person-plus me-1"></i> Añadir Persona
             </button>
-          </div>
-
-          <div v-if="area.personal && area.personal.length > 0" class="mt-2">
-            <h6 class="small fw-bold">Personal del área:</h6>
-            <div
-              v-for="(persona, pIndex) in area.personal"
-              :key="pIndex"
-              class="input-group input-group-sm mb-2"
-            >
-              <input
-                v-model="area.personal[pIndex].nombre"
-                type="text"
-                class="form-control form-control-sm"
-                placeholder="Nombre o apodo"
-              />
-              <button @click="removePersonFromArea(index, pIndex)" class="btn btn-outline-danger">
-                <i class="bi bi-trash"></i>
-              </button>
-            </div>
           </div>
         </div>
       </div>
 
-      <button @click="addNewArea" class="btn btn-outline-primary btn-sm mt-3">+ Añadir Área</button>
+      <button @click="addNewArea" class="btn btn-outline-primary mt-3">
+        <i class="bi bi-plus-circle me-1"></i> Añadir Nueva Área
+      </button>
     </section>
 
-    <!-- Guardar / Exportar -->
-    <section class="mb-5">
-      <button @click="saveOrganization" class="btn btn-success me-2">Guardar Configuración</button>
-      <button @click="exportAllData" class="btn btn-primary me-2">📤 Exportar Todo</button>
-      <router-link to="/list" class="btn btn-secondary">Volver al Listado</router-link>
-    </section>
+    <!-- Línea divisoria -->
+    <hr class="my-5" />
 
-    <!-- Importar backup -->
+    <!-- Exportar / Importar -->
     <section class="mb-5">
-      <h4 class="mb-3">📥 Importar Datos desde Backup (.json)</h4>
-      <div class="alert alert-warning small" role="alert">
-        <strong>Advertencia:</strong> Esto reemplazará los activos actuales. Asegúrate de tener un
-        respaldo si es necesario.
+      <div class="row g-4">
+        <!-- Exportar -->
+        <div class="col-md-6">
+          <div class="card shadow-sm border h-100">
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title text-primary d-flex align-items-center">
+                <i class="bi bi-box-arrow-up me-2"></i> Exportar Todo
+              </h5>
+              <p class="card-text small">
+                Genera un archivo .json con la organización y todos los activos registrados. Ideal
+                para respaldos o migraciones entre dispositivos.
+              </p>
+              <button @click="exportAllData" class="btn btn-primary mt-auto align-self-start">
+                📤 Exportar Todo
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Importar -->
+        <div class="col-md-6">
+          <div class="card shadow-sm border h-100">
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title text-success d-flex align-items-center">
+                <i class="bi bi-box-arrow-in-down me-2"></i> Importar desde Backup
+              </h5>
+              <p class="card-text small">
+                Carga un archivo .json generado por esta herramienta. Esta acción reemplazará los
+                datos actuales. Asegúrate de tener un respaldo si es necesario.
+              </p>
+
+              <label for="jsonFile" class="form-label mt-3">Selecciona un archivo .json</label>
+              <input
+                type="file"
+                id="jsonFile"
+                accept=".json"
+                @change="importJSON"
+                class="form-control form-control-sm"
+              />
+
+              <small class="text-muted mt-2">
+                Formato esperado: <code>{ organization: {...}, assets: [...] }</code>
+              </small>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <label for="jsonFile" class="form-label"
-        >Selecciona un archivo .json generado por esta herramienta</label
-      >
-      <input type="file" id="jsonFile" accept=".json" @change="importJSON" class="form-control" />
-
-      <small class="text-muted d-block mt-2">
-        El archivo debe contener una lista de activos en formato válido
-      </small>
     </section>
 
     <!-- Notificación -->
@@ -149,7 +215,7 @@ export default {
     const orgData = localStorage.getItem('organization')
     if (orgData) {
       const parsedOrg = JSON.parse(orgData)
-      // Asegura que todas las áreas tengan personal como array
+      // Valida que cada área tenga personal como array
       parsedOrg.areas = parsedOrg.areas.map((area) => ({
         ...area,
         personal: Array.isArray(area.personal) ? area.personal : [],
@@ -174,7 +240,7 @@ export default {
       })
     },
     removeArea(index) {
-      this.organization.areas = this.organization.areas.filter((_, i) => i !== index)
+      this.organization.areas.splice(index, 1)
     },
     addPersonToArea(areaIndex) {
       const area = this.organization.areas[areaIndex]
@@ -187,16 +253,14 @@ export default {
       this.organization.areas[areaIndex].personal.splice(personIndex, 1)
     },
     saveOrganization() {
-      // Asegura que cada área tenga personal como array
-      this.organization.areas = this.organization.areas.map((area) => {
-        return {
-          ...area,
-          personal: Array.isArray(area.personal) ? area.personal : [],
-        }
-      })
+      // Asegura que todas las áreas tengan personal como array
+      this.organization.areas = this.organization.areas.map((area) => ({
+        ...area,
+        personal: Array.isArray(area.personal) ? area.personal : [],
+      }))
 
       localStorage.setItem('organization', JSON.stringify(this.organization))
-      this.showNotification('Éxito', 'Organización y personal guardados correctamente', 'success')
+      this.showNotification('Éxito', 'Organización guardada correctamente', 'success')
     },
     exportAllData() {
       const organization = localStorage.getItem('organization')
@@ -231,12 +295,13 @@ export default {
           const content = e.target.result
           const parsed = JSON.parse(content)
 
-          // Validar que tenga 'organization' y 'assets'
           if (!parsed.organization || !parsed.assets) {
-            throw new Error('Faltan campos "organization" o "assets" en el archivo')
+            throw new Error('Falta "organization" o "assets"')
           }
 
-          // Guardar datos en localStorage
+          const confirmImport = confirm('¿Estás seguro? Esto borrará los datos actuales.')
+          if (!confirmImport) return
+
           localStorage.setItem('organization', JSON.stringify(parsed.organization))
           localStorage.setItem('assets', JSON.stringify(parsed.assets))
 
@@ -245,7 +310,7 @@ export default {
             this.$router.push('/list')
           }, 1500)
         } catch (error) {
-          this.showNotification('Error', 'El archivo no tiene un formato válido', 'danger')
+          this.showNotification('Error', 'El archivo no tiene un formato válido.', 'danger')
           console.error(error)
         }
       }
@@ -269,5 +334,20 @@ export default {
 
 .input-group .btn {
   padding: 0 0.75rem;
+}
+
+.list-personal {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Scroll fino */
+.list-personal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.list-personal::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
 }
 </style>
