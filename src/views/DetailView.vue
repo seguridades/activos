@@ -1,153 +1,150 @@
 <template>
   <div class="container mt-5">
-    <h2>Detalles del Activo</h2>
+    <!-- Título -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+      <h4 class="mb-0 d-flex align-items-center fs-5 fw-normal text-muted">
+        <i class="bi bi-eye me-2"></i> Detalles del Activo
+      </h4>
+      <router-link to="/list" class="btn btn-outline-dark d-flex align-items-center gap-2">
+        <i class="bi bi-arrow-left"></i> Volver a la lista
+      </router-link>
+    </div>
 
-    <!-- Mensaje si no hay activo seleccionado -->
+    <!-- Mensaje si no hay activo -->
     <div v-if="!selectedAsset" class="alert alert-warning">
       No se ha seleccionado un activo válido.
       <router-link to="/list" class="alert-link">Volver a la lista</router-link>
     </div>
 
-    <!-- Detalles del activo -->
-    <div v-else>
-      <!-- Tipo de activo -->
-      <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-          {{ formatAssetType(selectedAsset.type) }}
-        </div>
-        <div class="card-body">
-          <ul class="list-group list-group-flush">
-            <!-- Nombre -->
-            <li class="list-group-item"><strong>Nombre:</strong> {{ assetName }}</li>
+    <!-- Card principal con todos los datos -->
+    <div v-else class="card shadow-sm border mb-4">
+      <div class="card-body">
+        <h5 class="card-title d-flex align-items-center">
+          <i :class="`bi ${getIconByType(selectedAsset.type)} me-2`"></i>
+          {{ assetName }}
+        </h5>
 
-            <!-- Descripción -->
-            <li class="list-group-item">
-              <strong>Descripción:</strong> {{ selectedAsset.description || 'No definida' }}
-            </li>
+        <!-- Información general -->
+        <ul class="list-group list-group-flush">
+          <!-- Datos comunes -->
+          <li class="list-group-item">
+            <strong>Tipo:</strong> {{ formatAssetType(selectedAsset.type) }}
+          </li>
+          <li class="list-group-item"><strong>Nombre:</strong> {{ assetName }}</li>
+          <li class="list-group-item">
+            <strong>Sensibilidad:</strong>
+            <span
+              :class="`badge bg-${getSensitivityColor(selectedAsset.sensitivity)}`"
+              class="ms-2"
+            >
+              {{ formatSensitivity(selectedAsset.sensitivity) }}
+            </span>
+          </li>
+          <li class="list-group-item">
+            <strong>Descripción:</strong> {{ selectedAsset.description || '-' }}
+          </li>
+          <li class="list-group-item">
+            <strong>Área Responsable:</strong> {{ selectedAsset.area?.name || 'Sin área' }}
+          </li>
+          <li class="list-group-item">
+            <strong>Responsable:</strong> {{ selectedAsset.person || 'Sin responsable' }}
+          </li>
+          <li class="list-group-item">
+            <strong>Etiquetas / Categorías:</strong> {{ selectedAsset.tags || '-' }}
+          </li>
 
-            <!-- Nivel de Sensibilidad -->
-            <li class="list-group-item">
-              <strong>Sensibilidad:</strong>
-              <span
-                :class="`badge bg-${getSensitivityColor(selectedAsset.sensitivity)}`"
-                style="margin-left: 10px"
-              >
-                {{ formatSensitivity(selectedAsset.sensitivity) }}
-              </span>
-            </li>
+          <!-- Hardware -->
+          <li v-if="selectedAsset.type === 'hardware'" class="list-group-item">
+            <strong>Número de Serie:</strong> {{ selectedAsset.serialNumber || '-' }}
+          </li>
+          <li v-if="selectedAsset.type === 'hardware'" class="list-group-item">
+            <strong>Marca y Modelo:</strong> {{ selectedAsset.brandModel || '-' }}
+          </li>
+          <li v-if="selectedAsset.type === 'hardware'" class="list-group-item">
+            <strong>Ubicación Física:</strong> {{ selectedAsset.physicalLocation || '-' }}
+          </li>
+          <li v-if="selectedAsset.type === 'hardware'" class="list-group-item">
+            <strong>Fecha de Adquisición:</strong> {{ formatDate(selectedAsset.acquisitionDate) }}
+          </li>
+          <li v-if="selectedAsset.type === 'hardware'" class="list-group-item">
+            <strong>Estado del Dispositivo:</strong>
+            {{ formatDeviceStatus(selectedAsset.deviceStatus) }}
+          </li>
+          <li v-if="selectedAsset.type === 'hardware'" class="list-group-item">
+            <strong>Último Mantenimiento:</strong> {{ formatDate(selectedAsset.lastMaintenance) }}
+          </li>
+          <li v-if="selectedAsset.type === 'hardware'" class="list-group-item">
+            <strong>Dispositivo Cifrado:</strong>
+            {{ selectedAsset.isEncrypted === 'si' ? 'Sí' : 'No' }}
+          </li>
 
-            <!-- Área Responsable -->
-            <li class="list-group-item">
-              <strong>Área Responsable:</strong> {{ selectedAsset.area?.name || 'Sin área' }}
-            </li>
+          <!-- Software -->
+          <li v-if="selectedAsset.type === 'software'" class="list-group-item">
+            <strong>Tipo de Cuenta:</strong> {{ selectedAsset.accountType || '-' }}
+          </li>
+          <li v-if="selectedAsset.type === 'software'" class="list-group-item">
+            <strong>Usuario (Login):</strong> {{ selectedAsset.username || '-' }}
+          </li>
+          <li v-if="selectedAsset.type === 'software'" class="list-group-item">
+            <strong>URL:</strong>
+            <a :href="selectedAsset.url" target="_blank" v-if="selectedAsset.url">{{
+              selectedAsset.url
+            }}</a>
+            <span v-else>-</span>
+          </li>
+          <li v-if="selectedAsset.type === 'software'" class="list-group-item">
+            <strong>¿Tiene 2FA?:</strong> {{ selectedAsset.hasTwoFactor === 'si' ? 'Sí' : 'No' }}
+          </li>
+          <li v-if="selectedAsset.type === 'software'" class="list-group-item">
+            <strong>Cuenta Compartida:</strong> {{ selectedAsset.sharedAccount ? 'Sí' : 'No' }}
+          </li>
+          <li v-if="selectedAsset.type === 'software'" class="list-group-item">
+            <strong>Fecha de Renovación:</strong> {{ formatDate(selectedAsset.renewalDate) }}
+          </li>
 
-            <!-- Persona Responsable -->
-            <li class="list-group-item">
-              <strong>Responsable:</strong> {{ selectedAsset.person || 'Sin responsable' }}
-            </li>
-
-            <!-- Etiquetas -->
-            <li class="list-group-item">
-              <strong>Etiquetas / Categorías:</strong> {{ selectedAsset.tags || '-' }}
-            </li>
-          </ul>
-        </div>
+          <!-- Digital -->
+          <li v-if="selectedAsset.type === 'digital'" class="list-group-item">
+            <strong>Tipo de Archivo:</strong> {{ selectedAsset.digitalType || '-' }}
+          </li>
+          <li v-if="selectedAsset.type === 'digital'" class="list-group-item">
+            <strong>Ubicación:</strong> {{ selectedAsset.location || '-' }}
+          </li>
+          <li v-if="selectedAsset.type === 'digital'" class="list-group-item">
+            <strong>Fecha de Creación:</strong> {{ formatDate(selectedAsset.creationDate) }}
+          </li>
+          <li v-if="selectedAsset.type === 'digital'" class="list-group-item">
+            <strong>¿Acceso restringido?:</strong>
+            {{ selectedAsset.restrictedAccess === 'si' ? 'Sí' : 'No' }}
+          </li>
+        </ul>
       </div>
 
-      <!-- Campos específicos por tipo -->
-      <div v-if="selectedAsset.type === 'hardware'" class="card mb-4">
-        <div class="card-header bg-dark text-white">Hardware</div>
-        <div class="card-body">
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item">
-              <strong>Número de Serie:</strong> {{ selectedAsset.serialNumber || '-' }}
-            </li>
-            <li class="list-group-item">
-              <strong>Marca y Modelo:</strong> {{ selectedAsset.brandModel || '-' }}
-            </li>
-            <li class="list-group-item">
-              <strong>Ubicación Física:</strong> {{ selectedAsset.physicalLocation || '-' }}
-            </li>
-            <li class="list-group-item">
-              <strong>Fecha de Adquisición:</strong> {{ formatDate(selectedAsset.acquisitionDate) }}
-            </li>
-            <li class="list-group-item">
-              <strong>Dispositivo Cifrado:</strong>
-              {{ selectedAsset.isEncrypted === 'si' ? 'Sí' : 'No' }}
-            </li>
-            <li class="list-group-item">
-              <strong>Estado del Dispositivo:</strong>
-              {{ formatDeviceStatus(selectedAsset.deviceStatus) }}
-            </li>
-            <li class="list-group-item">
-              <strong>Último Mantenimiento:</strong> {{ formatDate(selectedAsset.lastMaintenance) }}
-            </li>
-          </ul>
-        </div>
+      <!-- Botones de acción -->
+      <div class="card-footer bg-white d-flex justify-content-end gap-2">
+        <button
+          @click="exportToPDF(selectedAsset)"
+          class="btn btn-outline-primary d-flex align-items-center gap-2"
+        >
+          <i class="bi bi-file-earmark-pdf"></i> Exportar como PDF
+        </button>
+        <router-link
+          :to="`/edit/${selectedAsset.id}`"
+          class="btn btn-outline-primary d-flex align-items-center gap-2"
+        >
+          <i class="bi bi-pencil"></i> Editar
+        </router-link>
       </div>
-
-      <div v-if="selectedAsset.type === 'software'" class="card mb-4">
-        <div class="card-header bg-info text-white">Cuenta Online</div>
-        <div class="card-body">
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item">
-              <strong>Tipo de Cuenta:</strong> {{ selectedAsset.accountType || '-' }}
-            </li>
-            <li class="list-group-item">
-              <strong>Usuario (Login):</strong> {{ selectedAsset.username || '-' }}
-            </li>
-            <li class="list-group-item">
-              <strong>URL:</strong>
-              <a :href="selectedAsset.url" target="_blank">{{ selectedAsset.url || '-' }}</a>
-            </li>
-            <li class="list-group-item">
-              <strong>¿Tiene 2FA?:</strong> {{ selectedAsset.hasTwoFactor === 'si' ? 'Sí' : 'No' }}
-            </li>
-            <li class="list-group-item">
-              <strong>¿Es cuenta compartida?:</strong>
-              {{ selectedAsset.sharedAccount ? 'Sí' : 'No' }}
-            </li>
-            <li class="list-group-item">
-              <strong>Fecha de renovación:</strong> {{ formatDate(selectedAsset.renewalDate) }}
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div v-if="selectedAsset.type === 'digital'" class="card mb-4">
-        <div class="card-header bg-secondary text-white">Recurso Digital</div>
-        <div class="card-body">
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item">
-              <strong>Tipo de Archivo:</strong> {{ selectedAsset.digitalType || '-' }}
-            </li>
-            <li class="list-group-item">
-              <strong>Ubicación:</strong> {{ selectedAsset.location || '-' }}
-            </li>
-            <li class="list-group-item">
-              <strong>Fecha de creación:</strong> {{ formatDate(selectedAsset.creationDate) }}
-            </li>
-            <li class="list-group-item">
-              <strong>¿Acceso restringido?:</strong>
-              {{ selectedAsset.restrictedAccess === 'si' ? 'Sí' : 'No' }}
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Botón volver -->
-      <router-link to="/list" class="btn btn-secondary">Volver a la Lista</router-link>
     </div>
   </div>
 </template>
 
 <script>
+import { jsPDF } from 'jspdf'
+
 export default {
   data() {
     const assets = JSON.parse(localStorage.getItem('assets') || '[]')
     const assetId = parseInt(this.$route.params.id)
-
-    // Buscar activo por ID
     const selectedAsset = assets.find((asset) => asset.id === assetId) || null
 
     return {
@@ -201,6 +198,18 @@ export default {
           return 'secondary'
       }
     },
+    getIconByType(type) {
+      switch (type) {
+        case 'hardware':
+          return 'bi-laptop'
+        case 'software':
+          return 'bi-person-badge'
+        case 'digital':
+          return 'bi-cloud'
+        default:
+          return 'bi-question-circle'
+      }
+    },
     formatDeviceStatus(status) {
       switch (status) {
         case 'nuevo':
@@ -218,6 +227,105 @@ export default {
     formatDate(date) {
       return date ? new Date(date).toLocaleDateString() : '-'
     },
+    exportToPDF(asset) {
+      const doc = new jsPDF()
+
+      // Encabezado del PDF
+      const now = new Date()
+      doc.setFontSize(16)
+      doc.text(`Activo: ${this.assetName}`, 14, 14)
+
+      doc.setFontSize(12)
+      doc.text(`Responsable: ${asset.person || 'No definido'}`, 14, 22)
+      doc.text(`Fecha de generación: ${now.toLocaleString()}`, 14, 30)
+
+      let startY = 40
+      const bgColor = [248, 249, 250] // #f8f9fa → gris claro
+
+      // Datos comunes
+      const fields = [
+        { label: 'Tipo', value: this.formatAssetType(asset.type) },
+        { label: 'Nombre', value: this.assetName },
+        { label: 'Descripción', value: asset.description || '-' },
+        {
+          label: 'Serie / Usuario / Ubicación',
+          value: asset.serialNumber || asset.username || asset.location || '-',
+        },
+        { label: 'Nivel de Sensibilidad', value: this.formatSensitivity(asset.sensitivity) },
+        { label: 'Área Responsable', value: asset.area?.name || '-' },
+        { label: 'Persona Responsable', value: asset.person || '-' },
+        { label: 'Etiquetas', value: asset.tags || '-' },
+      ]
+
+      // Añadir datos específicos según tipo
+      if (asset.type === 'hardware') {
+        fields.push(
+          { label: 'Número de Serie', value: asset.serialNumber || '-' },
+          { label: 'Marca y Modelo', value: asset.brandModel || '-' },
+          { label: 'Ubicación Física', value: asset.physicalLocation || '-' },
+          { label: 'Fecha de Adquisición', value: this.formatDate(asset.acquisitionDate) },
+          { label: 'Estado del Dispositivo', value: this.formatDeviceStatus(asset.deviceStatus) },
+          { label: 'Último Mantenimiento', value: this.formatDate(asset.lastMaintenance) },
+          { label: 'Dispositivo Cifrado', value: asset.isEncrypted === 'si' ? 'Sí' : 'No' },
+        )
+      }
+
+      if (asset.type === 'software') {
+        fields.push(
+          { label: 'Usuario (Login)', value: asset.username || '-' },
+          { label: 'URL', value: asset.url || '-' },
+          { label: 'Tipo de Cuenta', value: asset.accountType || '-' },
+          { label: '¿Tiene 2FA?', value: asset.hasTwoFactor === 'si' ? 'Sí' : 'No' },
+          { label: 'Cuenta Compartida', value: asset.sharedAccount ? 'Sí' : 'No' },
+          { label: 'Fecha de Renovación', value: this.formatDate(asset.renewalDate) },
+        )
+      }
+
+      if (asset.type === 'digital') {
+        fields.push(
+          { label: 'Tipo de Archivo', value: asset.digitalType || '-' },
+          { label: 'Ubicación', value: asset.location || '-' },
+          { label: 'Fecha de Creación', value: this.formatDate(asset.creationDate) },
+          { label: '¿Acceso restringido?', value: asset.restrictedAccess === 'si' ? 'Sí' : 'No' },
+        )
+      }
+
+      // Agregar rectángulo de fondo gris claro
+      doc.setFillColor(bgColor[0], bgColor[1], bgColor[2])
+      doc.rect(12, startY - 5, 180, fields.length * 6 + 10, 'F')
+
+      // Agregar contenido
+      for (const f of fields) {
+        doc.text(`${f.label}: ${f.value}`, 14, startY)
+        startY += 6
+      }
+
+      // Guardar documento
+      doc.save(`activo-${asset.id}.pdf`)
+      this.showNotification('Éxito', 'PDF generado con formato limpio y coherente', 'success')
+    },
+    showNotification(title, message, type = 'success') {
+      this.notification = { show: true, title, message, type }
+      setTimeout(() => {
+        this.notification.show = false
+      }, 3000)
+    },
   },
 }
 </script>
+
+<style scoped>
+.card-title i.bi {
+  font-size: 1.2rem;
+}
+
+.list-group-item strong {
+  min-width: 180px;
+  display: inline-block;
+  font-weight: 600;
+}
+
+.btn i.bi {
+  font-size: 1rem;
+}
+</style>

@@ -1,5 +1,6 @@
 <template>
   <div class="container mt-5">
+    <!-- Título -->
     <h2>Editar Activo</h2>
 
     <!-- Tipo de Activo -->
@@ -19,22 +20,22 @@
       <input
         v-if="asset.type === 'hardware'"
         v-model="asset.name"
-        type="text"
         id="assetName"
+        type="text"
         class="form-control"
       />
       <input
         v-if="asset.type === 'software'"
         v-model="asset.accountName"
-        type="text"
         id="assetName"
+        type="text"
         class="form-control"
       />
       <input
         v-if="asset.type === 'digital'"
         v-model="asset.digitalName"
-        type="text"
         id="assetName"
+        type="text"
         class="form-control"
       />
     </div>
@@ -94,14 +95,12 @@
         class="form-control"
         placeholder="Ej: María González"
       />
-      <small class="text-muted"
-        >Este nombre se agregará automáticamente al listado de personal.</small
-      >
+      <small class="text-muted">
+        Este nombre se agregará automáticamente al listado de personal.
+      </small>
     </div>
 
     <!-- Campos específicos por tipo -->
-
-    <!-- Hardware -->
     <div v-if="asset.type === 'hardware'">
       <div class="mb-3">
         <label for="serialNumber" class="form-label">Número de Serie</label>
@@ -147,14 +146,13 @@
       </div>
     </div>
 
-    <!-- Cuentas Online -->
     <div v-if="asset.type === 'software'">
       <div class="mb-3">
         <label for="username" class="form-label">Usuario (Login)</label>
         <input v-model="asset.username" id="username" type="text" class="form-control" />
       </div>
       <div class="mb-3">
-        <label for="url" class="form-label">URL del Portal / Sitio</label>
+        <label for="url" class="form-label">URL del Portal</label>
         <input v-model="asset.url" id="url" type="url" class="form-control" />
       </div>
       <div class="mb-3">
@@ -184,16 +182,15 @@
       </div>
     </div>
 
-    <!-- Recursos Digitales -->
     <div v-if="asset.type === 'digital'">
       <div class="mb-3">
-        <label for="location" class="form-label">Ubicación del Recurso</label>
+        <label for="location" class="form-label">Ubicación</label>
         <input v-model="asset.location" id="location" type="text" class="form-control" />
       </div>
       <div class="mb-3">
         <label for="digitalType" class="form-label">Tipo de Archivo</label>
         <select v-model="asset.digitalType" id="digitalType" class="form-select">
-          <option value="documento">Documento (PDF, Excel, Word, etc.)</option>
+          <option value="documento">Documento (PDF, Word, Excel)</option>
           <option value="multimedia">Multimedia</option>
           <option value="base_datos">Base de Datos</option>
           <option value="certificado">Certificado / Llave</option>
@@ -203,13 +200,11 @@
         </select>
       </div>
       <div class="mb-3">
-        <label for="creationDate" class="form-label"
-          >Fecha de creación / última actualización</label
-        >
+        <label for="creationDate" class="form-label">Fecha de creación</label>
         <input v-model="asset.creationDate" id="creationDate" type="date" class="form-control" />
       </div>
       <div class="mb-3">
-        <label class="form-label">¿Tiene acceso restringido?</label>
+        <label class="form-label">¿Acceso restringido?</label>
         <select v-model="asset.restrictedAccess" class="form-select">
           <option value="si">Sí</option>
           <option value="no">No</option>
@@ -230,13 +225,7 @@
     <!-- Etiquetas / Tags -->
     <div class="mb-3">
       <label for="tags" class="form-label">Etiquetas / Categorías</label>
-      <input
-        v-model="asset.tags"
-        id="tags"
-        type="text"
-        class="form-control"
-        placeholder="Ej: Confidencial, Cliente X, Legales"
-      />
+      <input v-model="asset.tags" id="tags" type="text" class="form-control" />
       <small class="text-muted">Separa por comas si usas múltiples etiquetas</small>
     </div>
 
@@ -244,11 +233,9 @@
     <button :disabled="isSaving" @click="saveAsset" class="btn btn-success me-2">
       {{ isSaving ? 'Guardando...' : 'Guardar Cambios' }}
     </button>
-
     <button @click="deleteAsset(asset.id)" type="button" class="btn btn-danger me-2">
       Eliminar Activo
     </button>
-
     <router-link to="/list" class="btn btn-secondary">Cancelar</router-link>
 
     <!-- Notificación -->
@@ -258,6 +245,9 @@
       :message="notification.message"
       :type="notification.type"
     />
+
+    <!-- Espacio adicional al final -->
+    <div class="mb-5"></div>
   </div>
 </template>
 
@@ -272,7 +262,6 @@ export default {
     const assets = JSON.parse(localStorage.getItem('assets') || '[]')
     const assetId = parseInt(this.$route.params.id)
     const asset = assets.find((a) => a.id === assetId) || {}
-
     return {
       asset,
       useCustomPerson: false,
@@ -303,6 +292,30 @@ export default {
     },
   },
   methods: {
+    getIconByType(type) {
+      switch (type) {
+        case 'hardware':
+          return 'bi-laptop'
+        case 'software':
+          return 'bi-person-badge'
+        case 'digital':
+          return 'bi-cloud'
+        default:
+          return 'bi-question-circle'
+      }
+    },
+    formatAssetType(type) {
+      switch (type) {
+        case 'hardware':
+          return 'Hardware'
+        case 'software':
+          return 'Cuenta Online'
+        case 'digital':
+          return 'Recurso Digital'
+        default:
+          return 'Desconocido'
+      }
+    },
     resetResponsable() {
       this.useCustomPerson = false
       if (
@@ -317,15 +330,13 @@ export default {
     },
     saveAsset() {
       this.isSaving = true
-
-      // Si marcó "no está en la lista", agregarla al personal del área
+      // Si marcó "no está en la lista", agregarla al área seleccionada
       if (this.useCustomPerson && this.asset.person.trim()) {
         const exists = this.selectedArea.personal.some((p) => p.nombre === this.asset.person.trim())
         if (!exists) {
           this.selectedArea.personal.push({ nombre: this.asset.person.trim() })
         }
 
-        // Actualiza la organización en localStorage
         const updatedOrganization = {
           ...this.organization,
           areas: this.organization.areas.map((area) => {
@@ -335,7 +346,6 @@ export default {
             return area
           }),
         }
-
         localStorage.setItem('organization', JSON.stringify(updatedOrganization))
       }
 
@@ -346,25 +356,21 @@ export default {
       if (index !== -1) {
         assets[index] = { ...this.asset }
         localStorage.setItem('assets', JSON.stringify(assets))
-
-        this.showNotification('Éxito', 'Activo y personal actualizados correctamente', 'success')
+        this.showNotification('Éxito', 'Activo guardado correctamente', 'success')
         setTimeout(() => {
           this.$router.push('/list')
         }, 1000)
       } else {
-        this.showNotification('Error', 'No se pudo encontrar el activo para actualizar', 'danger')
+        this.showNotification('Error', 'No se pudo encontrar el activo para guardar', 'danger')
         this.isSaving = false
       }
     },
     deleteAsset(id) {
       const confirmDelete = confirm('¿Estás seguro de eliminar este activo?')
       if (!confirmDelete) return
-
-      // Elimina el activo del localStorage
       let assets = JSON.parse(localStorage.getItem('assets') || '[]')
       assets = assets.filter((asset) => asset.id !== id)
       localStorage.setItem('assets', JSON.stringify(assets))
-
       this.showNotification('Éxito', 'Activo eliminado correctamente', 'success')
       setTimeout(() => {
         this.$router.push('/list')
@@ -379,3 +385,23 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.card-header i.bi {
+  font-size: 1.2rem;
+}
+
+.form-label i.bi {
+  font-size: 1rem;
+}
+
+.btn i.bi {
+  font-size: 1rem;
+}
+
+.card-body input,
+.card-body select,
+.card-body textarea {
+  margin-bottom: 0.5rem;
+}
+</style>

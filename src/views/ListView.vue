@@ -1,9 +1,23 @@
 <template>
   <div class="container mt-5">
-    <h2>Lista de Activos</h2>
+    <!-- Título + Botón -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+      <!-- Título -->
+      <h2 class="mb-0 d-flex align-items-center">
+        <i class="bi bi-list-task me-2"></i> Lista de Activos
+      </h2>
+
+      <!-- Botón Agregar Activo -->
+      <router-link
+        to="/add-asset"
+        class="btn btn-outline-success d-flex align-items-center gap-2 btn-sm"
+      >
+        <i class="bi bi-plus-circle"></i> Agregar Activo
+      </router-link>
+    </div>
 
     <!-- Filtros -->
-    <div class="row g-3 mb-4">
+    <div class="row g-3 mb-4 align-items-end">
       <div class="col-md-3">
         <input
           v-model="searchQuery"
@@ -46,8 +60,58 @@
       <router-link to="/add-asset">Agregar Activo</router-link> para comenzar.
     </div>
 
-    <!-- Tabla -->
-    <div v-else class="table-responsive">
+    <!-- Vista en tarjetas - Móvil -->
+    <div v-if="isMobile" class="mb-4">
+      <div v-for="asset in filteredAssets" :key="asset.id" class="card shadow-sm border mb-3">
+        <div class="card-body">
+          <h5 class="card-title d-flex align-items-center">
+            <i :class="`bi ${getIconByType(asset.type)} me-2`"></i>
+            {{ getAssetName(asset) }}
+          </h5>
+
+          <ul class="list-unstyled small">
+            <li><strong>Tipo:</strong> {{ formatAssetType(asset.type) }}</li>
+            <li>
+              <strong>Serie/Usuario/Loc.:</strong>
+              {{
+                asset.type === 'hardware'
+                  ? asset.serialNumber || '-'
+                  : asset.type === 'software'
+                    ? asset.username || '-'
+                    : asset.type === 'digital'
+                      ? asset.location || '-'
+                      : '-'
+              }}
+            </li>
+            <li>
+              <strong>Sensibilidad:</strong>
+              <span :class="`badge bg-${getSensitivityColor(asset.sensitivity)}`" class="ms-1">
+                {{ formatSensitivity(asset.sensitivity) }}
+              </span>
+            </li>
+            <li><strong>Área:</strong> {{ asset.area?.name || '-' }}</li>
+            <li><strong>Responsable:</strong> {{ asset.person || '-' }}</li>
+            <li><strong>Etiquetas:</strong> {{ asset.tags || '-' }}</li>
+          </ul>
+
+          <!-- Acciones -->
+          <div class="d-flex justify-content-end gap-2 mt-3">
+            <router-link :to="`/detail/${asset.id}`" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-eye"></i> Ver
+            </router-link>
+            <router-link :to="`/edit/${asset.id}`" class="btn btn-sm btn-outline-warning">
+              <i class="bi bi-pencil"></i> Editar
+            </router-link>
+            <button @click="deleteAsset(asset.id)" class="btn btn-sm btn-danger">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vista en tabla - Desktop -->
+    <div v-if="!isMobile" class="table-responsive d-none d-md-block">
       <table class="table table-striped table-bordered">
         <thead class="table-dark">
           <tr>
@@ -63,7 +127,10 @@
         </thead>
         <tbody>
           <tr v-for="asset in filteredAssets" :key="asset.id">
-            <td>{{ formatAssetType(asset.type) }}</td>
+            <td>
+              <i :class="`bi ${getIconByType(asset.type)} me-2`"></i>
+              {{ formatAssetType(asset.type) }}
+            </td>
             <td>{{ getAssetName(asset) }}</td>
             <td>
               {{ asset.type === 'hardware' ? asset.serialNumber || '-' : '' }}
@@ -78,30 +145,85 @@
             <td>{{ asset.area?.name || 'Sin área' }}</td>
             <td>{{ asset.person || 'Sin responsable' }}</td>
             <td>{{ asset.tags || '-' }}</td>
-            <td>
-              <router-link :to="`/detail/${asset.id}`" class="btn btn-sm btn-outline-primary me-1"
-                >Ver Detalles</router-link
-              >
-              <router-link :to="`/edit/${asset.id}`" class="btn btn-sm btn-outline-warning me-1"
-                >Editar</router-link
-              >
-              <button @click="deleteAsset(asset.id)" class="btn btn-sm btn-danger">Eliminar</button>
+            <td class="text-end">
+              <div class="btn-group btn-group-sm w-100" role="group" aria-label="Acciones">
+                <router-link
+                  :to="`/detail/${asset.id}`"
+                  class="btn btn-outline-primary"
+                  title="Ver detalles"
+                >
+                  <i class="bi bi-eye"></i>
+                </router-link>
+                <router-link
+                  :to="`/edit/${asset.id}`"
+                  class="btn btn-outline-warning"
+                  title="Editar activo"
+                >
+                  <i class="bi bi-pencil"></i>
+                </router-link>
+                <button
+                  @click="deleteAsset(asset.id)"
+                  class="btn btn-outline-danger"
+                  title="Eliminar activo"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Botones de exportación -->
-    <div class="mt-4">
-      <button @click="exportJSON" class="btn btn-info me-2">Exportar JSON</button>
-      <button @click="exportFullData('csv')" class="btn btn-secondary me-2">
-        Exportar Todos los Campos (CSV)
+    <!-- Mensaje de cuántos activos se muestran -->
+    <!-- Botón Reiniciar filtros -->
+    <button
+      @click="resetFilters"
+      class="btn btn-outline-secondary w-100"
+      title="Limpiar todos los filtros"
+    >
+      <i class="bi bi-arrow-counterclockwise me-1"></i> Reiniciar filtros
+    </button>
+    <div v-if="assets.length > 0" class="mt-3 small text-muted d-flex align-items-center">
+      <i class="bi bi-card-list me-1"></i>
+      <strong>{{ filteredAssets.length }} </strong> activos mostrados de
+      <strong>{{ assets.length }} </strong> totales
+    </div>
+
+    <!-- Botones de exportación – sin tooltip -->
+    <div class="mt-4 d-flex flex-wrap gap-2">
+      <!-- Exportar JSON -->
+      <button @click="exportJSON" class="btn btn-outline-info d-flex align-items-center gap-2">
+        <i class="bi bi-filetype-json"></i> Exportar JSON
       </button>
-      <button @click="exportFullData('pdf')" class="btn btn-primary me-2">
-        Exportar Tarjetas (PDF)
+
+      <!-- Exportar CSV -->
+      <button
+        @click="exportFullData('csv')"
+        class="btn btn-outline-secondary d-flex align-items-center gap-2"
+      >
+        <i class="bi bi-file-earmark-text"></i> Exportar CSV
       </button>
-      <router-link to="/" class="btn btn-secondary">Volver al Inicio</router-link>
+
+      <!-- Exportar PDF -->
+      <button
+        @click="exportFullData('pdf')"
+        class="btn btn-outline-primary d-flex align-items-center gap-2"
+      >
+        <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
+      </button>
+    </div>
+
+    <!-- Mensaje sobre filtros y exportación -->
+    <div class="mt-3 small text-muted">
+      <p class="mb-0">
+        <i class="bi bi-info-circle me-1"></i>
+        <strong>Nota:</strong> Los datos exportados reflejan lo que ves en pantalla.
+      </p>
+      <p class="mb-0">
+        Si hay filtros aplicados, solo se exportarán los resultados visibles. De lo contrario, se
+        incluirán todos los activos registrados.
+      </p>
     </div>
 
     <!-- Notificación -->
@@ -137,6 +259,7 @@ export default {
         message: '',
         type: 'success',
       },
+      isMobile: false,
     }
   },
   computed: {
@@ -179,6 +302,13 @@ export default {
       return result
     },
   },
+
+  mounted() {
+    this.isMobile = window.innerWidth < 768
+    window.addEventListener('resize', () => {
+      this.isMobile = window.innerWidth < 768
+    })
+  },
   methods: {
     getAssetName(asset) {
       switch (asset.type) {
@@ -191,6 +321,13 @@ export default {
         default:
           return '-'
       }
+    },
+    resetFilters() {
+      this.searchQuery = ''
+      this.selectedAreaFilter = ''
+      this.selectedTypeFilter = ''
+      this.personFilter = ''
+      this.tagFilter = ''
     },
     formatAssetType(type) {
       switch (type) {
@@ -228,18 +365,17 @@ export default {
           return 'secondary'
       }
     },
-    formatDeviceStatus(status) {
-      switch (status) {
-        case 'nuevo':
-          return 'Nuevo'
-        case 'en_uso':
-          return 'En Uso'
-        case 'en_reparacion':
-          return 'En Reparación'
-        case 'inactivo':
-          return 'Inactivo'
+
+    getIconByType(type) {
+      switch (type) {
+        case 'hardware':
+          return 'bi-laptop'
+        case 'software':
+          return 'bi-person-badge'
+        case 'digital':
+          return 'bi-cloud'
         default:
-          return 'Desconocido'
+          return 'bi-question-circle'
       }
     },
     deleteAsset(id) {
@@ -256,7 +392,9 @@ export default {
     },
     exportJSON() {
       try {
-        const blob = new Blob([localStorage.getItem('assets')], { type: 'application/json' })
+        // Usar filteredAssets (si hay filtros, exporta solo eso)
+        const dataToExport = this.filteredAssets.length > 0 ? this.filteredAssets : this.assets
+        const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' })
         saveAs(blob, 'activos.json')
         this.showNotification('Éxito', 'Archivo JSON descargado correctamente', 'success')
       } catch (error) {
@@ -343,9 +481,9 @@ export default {
     },
     exportCardsToPDF(data) {
       const doc = new jsPDF()
-
-      // Información de la organización
       const now = new Date()
+
+      // Encabezado
       doc.setFontSize(16)
       doc.text(`Organización: ${this.organization.name}`, 14, 14)
       doc.setFontSize(12)
@@ -354,14 +492,9 @@ export default {
 
       let startY = 40
 
-      // Colores por sensibilidad
-      const sensitivityColors = {
-        alta: [255, 99, 71],
-        media: [255, 204, 0],
-        baja: [144, 238, 144],
-      }
+      // Color gris claro para todas las tarjetas
+      const bgColor = [248, 249, 250] // #f8f9fa
 
-      // Generar tarjetas
       for (const asset of data) {
         const fields = []
 
@@ -416,17 +549,17 @@ export default {
           })
         }
 
-        // Definir color según sensibilidad
-        const bgColor = sensitivityColors[asset.sensitivity] || [255, 255, 255] // blanco por defecto
-
-        // Añadir rectángulo de fondo
+        // Fondo gris claro para todas las tarjetas
         doc.setFillColor(bgColor[0], bgColor[1], bgColor[2])
         doc.rect(12, startY - 5, 180, fields.length * 5 + 10, 'F')
 
         // Agregar texto
         const content = fields.map((f) => `${f.label}: ${f.value}`).join('\n')
+        doc.setTextColor(0, 0, 0)
         doc.setFont(undefined, 'normal')
         doc.text(content, 14, startY)
+        doc.setTextColor(0, 0, 0)
+
         startY += fields.length * 5 + 20
 
         // Separador entre tarjetas
@@ -434,23 +567,35 @@ export default {
         doc.setLineWidth(0.5)
         doc.line(12, startY - 10, 192, startY - 10)
 
-        // Salto de página si se pasa del límite
+        // Salto de página
         if (startY > 280) {
           doc.addPage()
           startY = 20
-          // Volver a poner encabezado en nueva página
           doc.setFontSize(16)
           doc.text(`Organización: ${this.organization.name}`, 14, 14)
           doc.setFontSize(12)
           doc.text(`Responsable: ${this.organization.responsable || 'No definido'}`, 14, 22)
           doc.text(`Fecha de generación: ${now.toLocaleString()}`, 14, 30)
-          startY = 40
         }
       }
 
       // Guardar documento
       doc.save('activos-tarjetas.pdf')
       this.showNotification('Éxito', 'PDF generado con tarjetas estilizadas', 'success')
+    },
+    formatDeviceStatus(status) {
+      switch (status) {
+        case 'nuevo':
+          return 'Nuevo'
+        case 'en_uso':
+          return 'En Uso'
+        case 'en_reparacion':
+          return 'En Reparación'
+        case 'inactivo':
+          return 'Inactivo'
+        default:
+          return 'Desconocido'
+      }
     },
     showNotification(title, message, type = 'success') {
       this.notification = { show: true, title, message, type }
@@ -461,3 +606,35 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.table-responsive {
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.table thead th {
+  background-color: #f59e0b !important;
+  color: white !important;
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: #fff;
+}
+
+.table tbody tr:nth-child(odd) {
+  background-color: #f8f9fa;
+}
+
+.btn i.bi {
+  font-size: 1.1rem;
+}
+
+.btn:hover i.bi {
+  transform: scale(1.1);
+  transition: all 0.2s ease-in-out;
+}
+.btn-reset-filters {
+  font-size: 0.85rem;
+}
+</style>

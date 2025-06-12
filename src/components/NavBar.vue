@@ -1,7 +1,7 @@
 <template>
   <nav
     class="navbar navbar-expand-lg shadow-sm mb-4 position-relative"
-    style="background-color: #f50057"
+    style="background-color: #f59e0b"
     data-bs-theme="light"
   >
     <div class="container-fluid">
